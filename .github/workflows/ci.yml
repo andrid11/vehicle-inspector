@@ -15,7 +15,7 @@ jobs:
           python-version: "3.11"
       # Light deps only — smoke tests use a fake model, so we don't install torch/ultralytics in CI.
       - name: Install light deps
-        run: pip install pydantic pyyaml numpy fastapi pillow python-multipart pytest ruff
+        run: pip install pydantic pyyaml numpy fastapi pillow python-multipart httpx pytest ruff
       - name: Lint
         run: ruff check src tests
       - name: Test

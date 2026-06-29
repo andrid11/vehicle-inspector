@@ -28,14 +28,20 @@ class _FakeDamageModel(SegModel):
 
 @pytest.fixture()
 def client():
-    fastapi_testclient = pytest.importorskip("fastapi.testclient")
     pytest.importorskip("multipart")  # python-multipart, required for UploadFile
+    # Latest starlette raises RuntimeError (not ImportError) at import of TestClient when
+    # httpx is missing, so importorskip won't catch it — handle both explicitly.
+    try:
+        from fastapi.testclient import TestClient
+    except (ImportError, RuntimeError) as e:
+        pytest.skip(f"TestClient unavailable (install httpx): {e}")
+
     from vehicle_inspector.inference import InspectionPipeline
     import vehicle_inspector.serving.app as appmod
 
     appmod._PIPELINE = InspectionPipeline(damage_model=_FakeDamageModel())
     appmod._MODEL_NAME = "fake"
-    return fastapi_testclient.TestClient(appmod.app)
+    return TestClient(appmod.app)
 
 
 def _png_bytes(h=96, w=128):
