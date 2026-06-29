@@ -13,22 +13,34 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 ## Now: finish Phase 1 (ship the MVP)
 
 ### Day 1 — Lock the work into git  ⟵ do this first, it protects everything else
-- [ ] Add `CarDD_release/` to `.gitignore` (raw dataset must not be committed).
-- [ ] `git status` → confirm no `*.pt`, no `datasets/`, no `runs/`, no `CarDD_release/`, no `.venv/`.
-- [ ] First commit: `git add -A && git commit -m "Phase 1 scaffold: data prep, YOLOv8-seg training, eval, FastAPI serving"`.
-- [ ] Create a GitHub repo and `git push -u origin master`.
+- [x] Add `CarDD_release/` to `.gitignore` (raw dataset must not be committed).
+- [x] `git status` → confirm no `*.pt`, no `datasets/`, no `runs/`, no `CarDD_release/`, no `.venv/`. (clean: 43 files staged)
+- [x] First commit `83545ef` — "Phase 1 scaffold: CarDD data prep, YOLOv8-seg training, evaluation, FastAPI serving".
+- [x] Deleted leftover lock; created GitHub repo and pushed.
+- [x] **Live:** https://github.com/andrid11/vehicle-inspector — public, 1 commit, no data/weights leaked. ✅ Day 1 DONE.
 - **Why:** a full day of work currently exists only in your working folder. This is the highest
   risk-to-effort task in the whole project.
 - **Done when:** the repo is on GitHub, clone is < ~5 MB (no data/weights), and `git log` shows a commit.
 
-### Day 2 — Make the run dir sane + verify weights path
-- [ ] Find why output nests as `runs/segment/runs/segment/...` (check `project`/`name` in
-  `configs/models/yolov8_seg.yaml` and how `train.py` passes them — Ultralytics joins `project`+`name`).
-- [ ] Decide one canonical layout, e.g. `runs/segment/yolov8s_cardd/`. Either re-point the config
-  or move the existing run; update README + `app.py` default `VI_DAMAGE_WEIGHTS` to match.
-- [ ] No retrain needed — you can move the existing `best.pt` to the canonical path.
-- **Done when:** `VI_DAMAGE_WEIGHTS=runs/segment/yolov8s_cardd/weights/best.pt` points at a real file
-  and the path is identical in README, `app.py`, and on disk.
+### Day 2 — Make the run dir sane + verify weights path  ✅ DONE
+- [x] **Root cause:** training `args.yaml` stored `project: runs/segment` as a *relative* path;
+  Ultralytics resolves a relative project against its global `runs_dir` setting (which on this
+  machine is `runs/segment`), so it got prepended twice → `runs/segment/runs/segment/...`.
+- [x] **Fix (code):** `train.py` and `evaluate.py` now force an **absolute** repo-rooted project
+  path (`<repo>/runs/<task>`) via `project_root()`. Absolute paths are used as-is, so the layout is
+  deterministic regardless of the global Ultralytics setting. Tests still pass (10/10).
+- [x] **Keeper identified + promoted:** two runs existed — `yolov8s_cardd` was *interrupted* at
+  epoch 28 (91 MB weights, optimizer not stripped); `yolov8s_cardd-2` ran the **full 100 epochs**
+  (23 MB weights, all val curves, mask mAP@50 0.73 vs 0.67). The full run was moved to the canonical
+  `runs/segment/yolov8s_cardd/weights/best.pt`.
+- [x] README / `app.py` / `GETTING_STARTED.md` already reference that exact path — verified, no edits needed.
+- [ ] **YOU (mount can't delete files):** remove the leftover junk to reclaim ~180 MB:
+  `Remove-Item -Recurse -Force runs\segment\runs, runs\segment\_dstparent`
+- **Done when:** `runs/segment/yolov8s_cardd/weights/best.pt` exists (✅ 23 MB) and future runs land
+  at `runs/segment/<name>` with no double-nesting.
+
+> Optional belt-and-braces: also reset the global setting on your machine — `yolo settings runs_dir=runs`
+> — so even ad-hoc `yolo` CLI calls outside this repo behave. Not required; the code fix already handles it.
 
 ### Day 3 — Prove the service works end-to-end
 - [ ] Put 2–3 real car photos in `assets/sample_inputs/`.

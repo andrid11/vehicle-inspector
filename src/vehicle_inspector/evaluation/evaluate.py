@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from vehicle_inspector.config import load_config
+from vehicle_inspector.config import load_config, project_root
 from vehicle_inspector.models import build_model
 
 
@@ -23,7 +23,10 @@ def eval_one(config_path: Path, weights: str | None = None) -> dict:
     if weights:
         cfg["weights"] = weights
     model = build_model(cfg)
-    metrics = model.evaluate(data=cfg["data"])
+    # Absolute, repo-rooted output dir so val results don't double-nest under
+    # Ultralytics' global runs_dir (same fix as training).
+    project = str(project_root() / "runs" / cfg.get("task", "segment"))
+    metrics = model.evaluate(data=cfg["data"], project=project)
     return {"name": cfg["name"], **metrics}
 
 
