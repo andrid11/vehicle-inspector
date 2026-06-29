@@ -34,15 +34,15 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
   (23 MB weights, all val curves, mask mAP@50 0.73 vs 0.67). The full run was moved to the canonical
   `runs/segment/yolov8s_cardd/weights/best.pt`.
 - [x] README / `app.py` / `GETTING_STARTED.md` already reference that exact path — verified, no edits needed.
-- [ ] **YOU (mount can't delete files):** remove the leftover junk to reclaim ~180 MB:
-  `Remove-Item -Recurse -Force runs\segment\runs, runs\segment\_dstparent`
+- [x] **Leftover junk removed** (`runs\segment\runs`, `runs\segment\_dstparent`) — clean single
+  `runs/segment/yolov8s_cardd/`.
 - **Done when:** `runs/segment/yolov8s_cardd/weights/best.pt` exists (✅ 23 MB) and future runs land
   at `runs/segment/<name>` with no double-nesting.
 
 > Optional belt-and-braces: also reset the global setting on your machine — `yolo settings runs_dir=runs`
 > — so even ad-hoc `yolo` CLI calls outside this repo behave. Not required; the code fix already handles it.
 
-### Day 3 — Prove the service works end-to-end  (code verified; YOU run the live demo)
+### Day 3 — Prove the service works end-to-end  ✅ DONE (live demo confirmed)
 - [x] **Traced the full request path** (serving → pipeline → model → annotate → report): the
   `Detection` contract (`area_px`, mask/box), report exports, and severity roll-up all line up.
 - [x] **Verified everything except the GPU model** with a fake detector: `/health` and `/inspect`
@@ -50,20 +50,24 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
   comes back. Locked it in as `tests/test_serving.py` — full suite now **13 passed**.
 - [x] **Robustness fix:** `app.py` now auto-uses the trained weights at the canonical path when
   `VI_DAMAGE_WEIGHTS` is unset (was silently loading pretrained COCO weights → wrong classes).
-- [ ] **YOU:** drop 2–3 real car photos into `assets/sample_inputs/`.
-- [ ] **YOU:** run the server and upload one in the browser:
-  `uvicorn vehicle_inspector.serving.app:app --port 8000` → open http://localhost:8000
-  (no env var needed now — it finds the trained weights automatically).
-- [ ] **YOU:** save a screenshot of a working result into `docs/` for the README (Day 7).
-- **Done when:** a browser upload returns a damage report + highlighted image. The wiring is already
-  proven; this step confirms the trained model loads + predicts on real photos.
+- [x] **Live demo confirmed:** ran the server, uploaded an image — got back a damage report +
+  annotated overlay. Trained model loads and predicts (correctly localized a dent even on an
+  out-of-domain GTA-5 render). Screenshots saved in `docs/`.
+- [x] **CI fixed + green:** latest `starlette` TestClient needs `httpx`, which CI's deps lacked →
+  serving tests errored. Added `httpx` to `ci.yml` + dev extras; fixture now skips cleanly if absent.
+  Suite: 13 passed (3 skip without httpx). Badge is green.
+- **Done when:** a browser upload returns a damage report + highlighted image. ✅ Confirmed.
 
-### Day 4 — Clean metrics artifact for the report
-- [ ] Run `evaluation/evaluate.py` against the canonical weights; capture per-class mAP@50,
-  mAP@[.5:.95], and mask IoU.
-- [ ] Write the numbers into a small `docs/RESULTS.md` table (this becomes section 6.1 of the report).
-- [ ] Note which classes are strong vs weak (you already have the confusion matrix — read it).
-- **Done when:** `docs/RESULTS.md` has a per-class table and 2–3 sentences of honest analysis.
+### Day 4 — Clean metrics artifact for the report  ✅ DONE
+- [x] Pulled the real validation metrics from the completed run (`results.csv`, PR-curve legends,
+  normalized confusion matrix) — no re-run needed.
+- [x] Wrote `docs/RESULTS.md`: headline box/mask mAP@50 + mAP@[.5:.95], a per-class table
+  (mAP@50, recall, miss-rate), and the reproduce command. Becomes report section 6.1.
+- [x] Strong-vs-weak analysis grounded in real numbers: glass_shatter/tire_flat/lamp_broken near
+  solved (0.88–0.995); scratch/crack/dent are the hard, subtle cases (0.46–0.63), failing as
+  class-vs-background (missed + false positives), not class-vs-class confusion.
+- **Done when:** `docs/RESULTS.md` has a per-class table and honest analysis. ✅
+- *Headline:* Box mAP@50 **0.745**, Mask mAP@50 **0.733** (CarDD val, 810 imgs, 100 epochs).
 
 ### Day 5 — Dockerize
 - [ ] Build the image from `docker/Dockerfile`; fix any missing system deps (OpenCV usually needs
