@@ -13,8 +13,8 @@ This is a multi-task computer-vision system built as a benchmark **and** a deplo
   to produce a full report.
 - A **FastAPI + Docker** service with an upload UI, deployable to any Linux/VPS host.
 
-> **Status:** scaffold. Phase 1 (one supervised damage model, end-to-end serving) is wired and
-> runnable; later models slot into the same registry/eval interfaces. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> **Status:** Phase 1 complete — a supervised damage model trained on CarDD, end-to-end FastAPI
+> serving, and a Docker image, all runnable. Later models slot into the same registry/eval interfaces.
 
 ---
 
@@ -54,13 +54,11 @@ src/vehicle_inspector/
 scripts/       helper scripts (run API, etc.)
 docker/        Dockerfile + docker-compose
 tests/         smoke + unit tests
-docs/          roadmap + thesis-style report outline
 ```
 
 ## Quickstart
 
-Full, copy-paste, Windows-first instructions are in **[`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md)**.
-The short version:
+From a fresh clone, with Python 3.10+:
 
 ```bash
 # 1. install
