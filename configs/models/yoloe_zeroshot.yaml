@@ -1,0 +1,18 @@
+# Phase 2 open-vocabulary baseline: YOLOE used zero-shot (no CarDD training).
+# Damage class names are passed as TEXT PROMPTS; we measure how far an
+# off-the-shelf open-vocab model gets with no fine-tuning.
+name: yoloe_zeroshot
+backend: yoloe                 # -> models/yoloe_baseline.py
+weights: yoloe-v8s-seg.pt
+data: configs/dataset_cardd.yaml
+task: segment
+trainable: false
+
+# Prompt text per class. Phrasing matters for open-vocab models; tune here.
+prompts:
+  dent: "a dent on a car body"
+  scratch: "a scratch on car paint"
+  crack: "a crack on a car surface"
+  glass_shatter: "shattered car glass"
+  lamp_broken: "a broken car lamp or headlight"
+  tire_flat: "a flat car tire"

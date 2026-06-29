@@ -1,0 +1,43 @@
+[project]
+name = "vehicle-inspector"
+version = "0.1.0"
+description = "Vision-based car damage detection and multi-task vehicle inspection"
+requires-python = ">=3.10"
+dependencies = [
+    "ultralytics>=8.3.0",   # YOLOv8/v11-seg and YOLOE
+    "pydantic>=2.0,<3.0",
+    "pyyaml>=6.0",
+    "numpy>=1.24",
+    "pillow>=10.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+]
+# heavier / optional model backends, installed only when you reach Phase 2
+extras = [
+    "pycocotools>=2.0",
+    # "detectron2"  # install per official instructions for Mask R-CNN
+    # "sam2"        # install per Meta's SAM2 instructions
+]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]

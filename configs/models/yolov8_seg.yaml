@@ -1,0 +1,16 @@
+# Phase 1 MVP model: supervised YOLOv8 segmentation on CarDD.
+name: yolov8_seg
+backend: ultralytics          # -> models/ultralytics_seg.py
+weights: yolov8s-seg.pt       # pretrained COCO weights to fine-tune from
+data: configs/dataset_cardd.yaml
+task: segment
+
+train:
+  epochs: 100
+  imgsz: 640
+  batch: 8          # safe for 8 GB VRAM (RTX 3060 Ti); raise if nvidia-smi shows headroom
+  workers: 4        # Windows: lower if you hit "shared file mapping / error 1455"; 0 = single-process
+  patience: 20
+  optimizer: auto
+  seed: 0
+  name: yolov8s_cardd   # saved under runs/segment/<name> by Ultralytics

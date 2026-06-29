@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Light deps only — smoke tests use a fake model, so we don't install torch/ultralytics in CI.
+      - name: Install light deps
+        run: pip install pydantic pyyaml numpy fastapi pillow python-multipart pytest ruff
+      - name: Lint
+        run: ruff check src tests
+      - name: Test
+        run: PYTHONPATH=src pytest -q

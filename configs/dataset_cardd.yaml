@@ -1,0 +1,15 @@
+# Ultralytics dataset config for CarDD after COCO->YOLO conversion.
+# `prepare_cardd.py` writes images/ and labels/ under this `path`.
+path: datasets/cardd_yolo
+train: images/train
+val: images/val
+test: images/test
+
+# CarDD damage classes (order is fixed and used everywhere downstream).
+names:
+  0: dent
+  1: scratch
+  2: crack
+  3: glass_shatter
+  4: lamp_broken
+  5: tire_flat

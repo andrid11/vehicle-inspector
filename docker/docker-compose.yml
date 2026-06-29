@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: vehicle-inspector:latest
+    ports:
+      - "8000:8000"
+    environment:
+      VI_DAMAGE_CONFIG: configs/models/yolov8_seg.yaml
+      VI_DAMAGE_WEIGHTS: /weights/best.pt
+    volumes:
+      # put your trained best.pt on the host and mount it read-only
+      - ./weights:/weights:ro
+    restart: unless-stopped
