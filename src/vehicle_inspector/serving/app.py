@@ -43,6 +43,14 @@ _PIPELINE = None
 _MODEL_NAME = None
 
 
+def _default_weights() -> str | None:
+    """Canonical trained weights, used when VI_DAMAGE_WEIGHTS is not set."""
+    from vehicle_inspector.config import project_root
+
+    w = project_root() / "runs" / "segment" / "yolov8s_cardd" / "weights" / "best.pt"
+    return str(w) if w.exists() else None
+
+
 def _get_pipeline():
     """Lazy-load the inference pipeline from env-configured paths."""
     global _PIPELINE, _MODEL_NAME
@@ -52,6 +60,19 @@ def _get_pipeline():
 
         cfg_path = os.environ.get("VI_DAMAGE_CONFIG", "configs/models/yolov8_seg.yaml")
         weights = os.environ.get("VI_DAMAGE_WEIGHTS")  # best.pt after training
+        if not weights:
+            # Fall back to the trained model if it exists, so the demo works without
+            # remembering the env var. Otherwise the config's *pretrained COCO* weights
+            # load instead and silently predict the wrong classes.
+            weights = _default_weights()
+            if weights:
+                print(f"[serving] VI_DAMAGE_WEIGHTS not set; using trained weights at {weights}")
+            else:
+                print(
+                    "[serving] WARNING: no trained weights found and VI_DAMAGE_WEIGHTS unset; "
+                    "loading pretrained base weights from config. Predictions will NOT be damage "
+                    "classes. Train a model or set VI_DAMAGE_WEIGHTS."
+                )
         _MODEL_NAME = load_config(cfg_path).get("name")
         _PIPELINE = InspectionPipeline.from_config(cfg_path, weights=weights)
     return _PIPELINE

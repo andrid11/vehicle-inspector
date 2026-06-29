@@ -42,13 +42,21 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 > Optional belt-and-braces: also reset the global setting on your machine — `yolo settings runs_dir=runs`
 > — so even ad-hoc `yolo` CLI calls outside this repo behave. Not required; the code fix already handles it.
 
-### Day 3 — Prove the service works end-to-end
-- [ ] Put 2–3 real car photos in `assets/sample_inputs/`.
-- [ ] `uvicorn vehicle_inspector.serving.app:app --port 8000` with the env weights set; open `/`.
-- [ ] Upload an image, confirm you get an annotated overlay + JSON `InspectionReport` back.
-- [ ] Fix whatever breaks (the pipeline's `run_with_overlay` path is the most likely first failure).
-- [ ] Save one screenshot of a working result into `docs/` for the README later.
-- **Done when:** a browser upload returns a damage report + highlighted image, and you have the screenshot.
+### Day 3 — Prove the service works end-to-end  (code verified; YOU run the live demo)
+- [x] **Traced the full request path** (serving → pipeline → model → annotate → report): the
+  `Detection` contract (`area_px`, mask/box), report exports, and severity roll-up all line up.
+- [x] **Verified everything except the GPU model** with a fake detector: `/health` and `/inspect`
+  both return 200, report assembles with correct severities, mask + box overlay render, base64 PNG
+  comes back. Locked it in as `tests/test_serving.py` — full suite now **13 passed**.
+- [x] **Robustness fix:** `app.py` now auto-uses the trained weights at the canonical path when
+  `VI_DAMAGE_WEIGHTS` is unset (was silently loading pretrained COCO weights → wrong classes).
+- [ ] **YOU:** drop 2–3 real car photos into `assets/sample_inputs/`.
+- [ ] **YOU:** run the server and upload one in the browser:
+  `uvicorn vehicle_inspector.serving.app:app --port 8000` → open http://localhost:8000
+  (no env var needed now — it finds the trained weights automatically).
+- [ ] **YOU:** save a screenshot of a working result into `docs/` for the README (Day 7).
+- **Done when:** a browser upload returns a damage report + highlighted image. The wiring is already
+  proven; this step confirms the trained model loads + predicts on real photos.
 
 ### Day 4 — Clean metrics artifact for the report
 - [ ] Run `evaluation/evaluate.py` against the canonical weights; capture per-class mAP@50,
