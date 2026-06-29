@@ -1,0 +1,34 @@
+# Keep the build context small. The image only COPYs pyproject/requirements/src/configs,
+# so everything below is excluded from what `docker build` ships to the daemon.
+
+# raw datasets & data (gigabytes)
+CarDD_release/
+datasets/
+data/
+
+# training outputs & weights — mounted at runtime, never baked into the image
+runs/
+weights/
+*.pt
+*.onnx
+
+# python envs & caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# vcs / ci / docs / tests / assets — not needed in a serving image
+.git/
+.github/
+docs/
+tests/
+assets/
+.env
