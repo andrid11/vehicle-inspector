@@ -23,6 +23,10 @@ CarDD_release/
 assets/sample_inputs/*
 !assets/sample_inputs/.gitkeep
 
+# personal developer notes (kept local, not in the repo)
+docs/
+
 # OS / editor
 .DS_Store
-.
+.idea/
+.vscode/
